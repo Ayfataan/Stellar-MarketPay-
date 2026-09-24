@@ -18,7 +18,7 @@ use crate::types::*;
 /// step.
 pub(crate) fn raise_dispute(env: Env, job_id: String, caller: Address) {
     caller.require_auth();
-    check_not_frozen(&env);
+    check_not_frozen(&env, &job_id);
 
     let mut escrow: Escrow = env
         .storage()
@@ -129,7 +129,7 @@ pub(crate) fn resolve_dispute(
     split_percentage: u32,
 ) {
     arbitrator.require_auth();
-    check_not_frozen(&env);
+    check_not_frozen(&env, &job_id);
 
     // ── Only the designated arbitrator may call this function ──────────────
     let stored_arbitrator: Address = env

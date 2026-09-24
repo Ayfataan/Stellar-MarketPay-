@@ -11,7 +11,7 @@ use crate::types::*;
 /// metadata so the certificate carries the job title (not just the id).
 pub(crate) fn mint_certificate(env: Env, job_id: String, title: String, client: Address) {
     client.require_auth();
-    check_not_frozen(&env);
+    check_not_frozen(&env, &job_id);
 
     let escrow: Escrow = env
         .storage()
@@ -76,7 +76,7 @@ pub(crate) fn mint_certificate(env: Env, job_id: String, title: String, client: 
 /// entries are never overwritten.
 pub(crate) fn submit_evidence_cid(env: Env, job_id: String, cid: Bytes, caller: Address) {
     caller.require_auth();
-    check_not_frozen(&env);
+    check_not_frozen(&env, &job_id);
 
     if cid.is_empty() {
         panic!("IPFS CID cannot be empty");
@@ -131,7 +131,7 @@ pub(crate) fn get_freelancer_certificates(env: Env, freelancer: Address) -> Vec<
 
 pub(crate) fn submit_client_rating(env: Env, job_id: String, client: Address, score: u32) {
     client.require_auth();
-    check_not_frozen(&env);
+    check_not_frozen(&env, &job_id);
     if !(1..=5).contains(&score) {
         panic!("Score must be between 1 and 5");
     }
@@ -162,7 +162,7 @@ pub(crate) fn submit_client_rating(env: Env, job_id: String, client: Address, sc
 
 pub(crate) fn submit_freelancer_rating(env: Env, job_id: String, freelancer: Address, score: u32) {
     freelancer.require_auth();
-    check_not_frozen(&env);
+    check_not_frozen(&env, &job_id);
     if !(1..=5).contains(&score) {
         panic!("Score must be between 1 and 5");
     }
@@ -199,7 +199,7 @@ pub(crate) fn submit_freelancer_rating(env: Env, job_id: String, freelancer: Add
 }
 
 pub(crate) fn resolve_arbitration(env: Env, case_id: u32) {
-    check_not_frozen(&env);
+    check_not_frozen(&env, case_id);
 
     let mut case: ArbitrationCase = env
         .storage()

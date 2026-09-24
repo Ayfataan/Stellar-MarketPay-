@@ -83,7 +83,7 @@ pub(crate) fn create_escrow_internal(
     deliverable_hash: Option<BytesN<32>>,
 ) {
     client.require_auth();
-    check_not_frozen(&env);
+    check_not_frozen(&env, &job_id);
 
     if amount <= 0 {
         panic!("Amount must be positive");
@@ -200,7 +200,7 @@ pub(crate) fn create_escrow_internal(
 /// Freelancer signals that they have started work.
 pub(crate) fn start_work(env: Env, job_id: String, freelancer: Address) {
     freelancer.require_auth();
-    check_not_frozen(&env);
+    check_not_frozen(&env, &job_id);
 
     let mut escrow: Escrow = env
         .storage()
@@ -229,7 +229,7 @@ pub(crate) fn start_work(env: Env, job_id: String, freelancer: Address) {
 /// Client approves completed work and releases funds to the freelancer.
 pub(crate) fn release_escrow(env: Env, job_id: String, client: Address) {
     client.require_auth();
-    check_not_frozen(&env);
+    check_not_frozen(&env, &job_id);
 
     let escrow: Escrow = env
         .storage()
@@ -409,7 +409,7 @@ pub(crate) fn release_with_conversion(
     _min_amount_out: i128,
 ) {
     client.require_auth();
-    check_not_frozen(&env);
+    check_not_frozen(&env, &job_id);
 
     let mut escrow: Escrow = env
         .storage()
@@ -520,7 +520,7 @@ pub(crate) fn release_with_conversion(
 /// Client cancels and gets a refund (only before work starts).
 pub(crate) fn refund_escrow(env: Env, job_id: String, client: Address) {
     client.require_auth();
-    check_not_frozen(&env);
+    check_not_frozen(&env, &job_id);
 
     let mut escrow: Escrow = env
         .storage()
@@ -563,7 +563,7 @@ pub(crate) fn refund_escrow(env: Env, job_id: String, client: Address) {
 /// older escrows fall back to the legacy ledger-sequence threshold.
 pub(crate) fn timeout_refund(env: Env, job_id: String, client: Address) {
     client.require_auth();
-    check_not_frozen(&env);
+    check_not_frozen(&env, &job_id);
 
     let mut escrow: Escrow = env
         .storage()
@@ -745,7 +745,7 @@ pub(crate) fn boost_job(
     amount: i128,
 ) {
     client.require_auth();
-    check_not_frozen(&env);
+    check_not_frozen(&env, &job_id);
 
     if amount <= 0 {
         panic!("Boost amount must be positive");

@@ -10,7 +10,7 @@ use crate::types::*;
 /// Can be called even if the escrow is Disputed, to release completed work.
 pub(crate) fn release_milestone(env: Env, job_id: String, milestone_id: u32, client: Address) {
     client.require_auth();
-    check_not_frozen(&env);
+    check_not_frozen(&env, &job_id);
 
     let mut escrow: Escrow = env
         .storage()
@@ -138,7 +138,7 @@ pub(crate) fn release_milestone(env: Env, job_id: String, milestone_id: u32, cli
 /// (the index assigned at creation time).
 pub(crate) fn reject_milestone(env: Env, job_id: String, milestone_index: u32, client: Address) {
     client.require_auth();
-    check_not_frozen(&env);
+    check_not_frozen(&env, &job_id);
 
     let mut escrow: Escrow = env
         .storage()
