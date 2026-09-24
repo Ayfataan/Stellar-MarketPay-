@@ -1,4 +1,5 @@
-use soroban_sdk::{symbol_short, Address, Bytes, Env, String, Vec};
+use soroban_sdk::{symbol_short, Address, Bytes, BytesN, Env, String, Vec};
+use soroban_sdk::xdr::ToXdr;
 
 use crate::helpers::check_not_frozen;
 use crate::types::*;
@@ -36,7 +37,19 @@ pub(crate) fn mint_certificate(env: Env, job_id: String, title: String, client: 
         panic!("Certificate already minted");
     }
 
+    let counter: u64 = env
+        .storage()
+        .instance()
+        .get(&DataKey::CertificateTokenCounter)
+        .unwrap_or(0);
+    let token_id = certificate_token_id(&env, counter);
+    let next_counter = counter.checked_add(1).expect("Counter overflow");
+    env.storage()
+        .instance()
+        .set(&DataKey::CertificateTokenCounter, &next_counter);
+
     let cert = Certificate {
+        token_id,
         job_id: job_id.clone(),
         title: title.clone(),
         client: escrow.client.clone(),
@@ -62,6 +75,35 @@ pub(crate) fn mint_certificate(env: Env, job_id: String, title: String, client: 
 
     env.events()
         .publish((symbol_short!("certmnt"), client), (job_id, escrow.amount));
+}
+
+fn certificate_token_id(env: &Env, counter: u64) -> BytesN<32> {
+    let mut payload = env.current_contract_address().to_xdr(env);
+    for byte in counter.to_be_bytes() {
+        payload.push_back(byte);
+    }
+    env.crypto().sha256(&payload).into()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::certificate_token_id;
+    use crate::MarketPayContract;
+    use soroban_sdk::Env;
+
+    #[test]
+    fn certificate_token_ids_differ_between_contract_deployments() {
+        let env = Env::default();
+        let first_contract = env.register(MarketPayContract, ());
+        let second_contract = env.register(MarketPayContract, ());
+
+        let first_token_id = env.as_contract(&first_contract, || certificate_token_id(&env, 0));
+        let second_token_id =
+            env.as_contract(&second_contract, || certificate_token_id(&env, 0));
+
+        assert_ne!(first_contract, second_contract);
+        assert_ne!(first_token_id, second_token_id);
+    }
 }
 
 /// Append an IPFS CID to a job's on-chain dispute-evidence audit trail
