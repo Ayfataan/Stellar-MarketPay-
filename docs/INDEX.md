@@ -33,6 +33,11 @@ Welcome to Stellar MarketPay documentation. This index helps you find what you n
 - **[Environment Variables](./environment-variables.md)** - Single source of truth for runtime config
 - **[Load Testing Guide](./load-testing.md)** - End-to-end k6 load testing, SLA thresholds, trend reports, and cost optimization
 
+### Operations & Recovery
+
+- **[PostgreSQL Outage Runbook](./runbooks/postgres-outage.md)** - Detect database incidents, restore backups, and verify indexer recovery
+- **[Redis Outage Runbook](./runbooks/redis-outage.md)** - Recover Redis cache, Bull queues, and rate-limit behavior
+
 ### API Documentation
 
 - **[API Reference](./api.md)** - Detailed API reference
